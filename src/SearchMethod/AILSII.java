@@ -202,6 +202,11 @@ public class AILSII
 		AILSII ailsII=new AILSII(instance,reader);
 		
 		ailsII.search();
+
+		String outpath = reader.getOutpath();
+		if (outpath != null) {
+			ailsII.getBestSolution().printSolution(outpath);
+		}
 	}
 	
 	public Solution getBestSolution() {
