@@ -4,3 +4,8 @@ Resultados/
 /.settings/
 .classpath
 .project
+build/classes/
+sources.txt
+*.classbuild/classes/
+sources.txt
+*.class
