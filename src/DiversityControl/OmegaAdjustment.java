@@ -90,4 +90,13 @@ public class OmegaAdjustment
 		this.actualOmega = actualOmega;
 	}
 
+	/**
+	 * Optional CLI override: set starting {@code omega} before search, clamped to
+	 * {@code [omegaMin, omegaMax]}.
+	 */
+	public void applyInitialOverride(double value)
+	{
+		this.omega = Math.min(omegaMax, Math.max(omegaMin, value));
+	}
+
 }

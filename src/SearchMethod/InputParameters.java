@@ -11,6 +11,8 @@ public class InputParameters
 	private double limit=Double.MAX_VALUE;
 	private double best=0;
 	private String outpath = null;
+	private String initialSolutionPath = null;
+	private Double initialOmega = null;
 	private Config config =new Config();
 	
 	public void readingInput(String[] args)
@@ -31,6 +33,8 @@ public class InputParameters
 					case "-gamma": config.setGamma(getGamma(args[i+1]));break;
 					case "-varphi": config.setVarphi(getVarphi(args[i+1]));break;
 					case "-outpath": outpath=args[i+1];break;
+					case "-initialSolution": initialSolutionPath=getAddress(args[i+1]);break;
+					case "-initialOmega": initialOmega=getInitialOmegaArg(args[i+1]);break;
 					
 				}
 			}
@@ -45,6 +49,8 @@ public class InputParameters
 		System.out.println("Best: "+best);
 		System.out.println("LimitTime: "+limit);
 		System.out.println(config);
+		System.out.println("initialSolution: "+(initialSolutionPath != null && !initialSolutionPath.isEmpty() ? initialSolutionPath : "(none)"));
+		System.out.println("initialOmega: "+(initialOmega != null ? initialOmega : "(none)"));
 	}
 	
 	
@@ -193,6 +199,31 @@ public class InputParameters
 
 	public String getOutpath() {
 		return outpath;
+	}
+
+	/** @return path from {@code -initialSolution}, or {@code null} if absent or invalid */
+	public String getInitialSolutionPath() {
+		if (initialSolutionPath == null || initialSolutionPath.isEmpty())
+			return null;
+		return initialSolutionPath;
+	}
+
+	/** @return value from {@code -initialOmega}, or {@code null} if absent */
+	public Double getInitialOmega() {
+		return initialOmega;
+	}
+
+	private Double getInitialOmegaArg(String text)
+	{
+		try
+		{
+			return Double.valueOf(text);
+		}
+		catch (NumberFormatException e)
+		{
+			System.err.println("The -initialOmega parameter must contain a valid real value.");
+			return null;
+		}
 	}
 	
 }

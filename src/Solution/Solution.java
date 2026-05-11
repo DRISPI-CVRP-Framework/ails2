@@ -3,6 +3,9 @@ package Solution;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import Data.File;
 import Data.Instance;
@@ -372,6 +375,102 @@ public class Solution
 		File arq = new File(end);
 		arq.write(this.toString());
 		arq.close();
+	}
+
+	/**
+	 * Load routes from a file in the same format as {@link #toString()} /
+	 * {@link Route#toString2()}: lines {@code Route #k: id1 id2 ...} and a final
+	 * {@code Cost ...} line. Customer ids must match {@link Node#name} for nodes
+	 * in {@link #getSolution()}.
+	 */
+	public void loadFromPrintedFormat(String path) throws IOException
+	{
+		List<List<Integer>> routeLines = new ArrayList<List<Integer>>();
+		try (BufferedReader in = new BufferedReader(new FileReader(path)))
+		{
+			String line;
+			while ((line = in.readLine()) != null)
+			{
+				line = line.trim();
+				if(line.isEmpty())
+					continue;
+				if(line.startsWith("Route"))
+				{
+					int colon = line.indexOf(':');
+					if(colon < 0)
+						throw new IOException("Invalid route line (no ':'): " + line);
+					String rest = line.substring(colon + 1).trim();
+					List<Integer> ids = new ArrayList<Integer>();
+					if(!rest.isEmpty())
+					{
+						for(String tok : rest.split("\\s+"))
+						{
+							if(tok.isEmpty())
+								continue;
+							ids.add(Integer.valueOf(tok.trim()));
+						}
+					}
+					routeLines.add(ids);
+				}
+				else if(line.startsWith("Cost"))
+				{
+					break;
+				}
+			}
+		}
+
+		if(routeLines.isEmpty())
+			throw new IOException("No Route lines found in " + path);
+
+		int nRoutes = routeLines.size();
+		if(nRoutes > numRoutesMax)
+			throw new IOException("Solution has " + nRoutes + " routes but max is " + numRoutesMax);
+
+		for(int i = 0; i < routes.length; i++)
+		{
+			routes[i].clean();
+			routes[i].nameRoute = i;
+		}
+
+		f = 0;
+		numRoutes = nRoutes;
+
+		HashSet<Integer> seen = new HashSet<Integer>();
+		for(int r = 0; r < numRoutes; r++)
+		{
+			List<Integer> ids = routeLines.get(r);
+			for(int id : ids)
+			{
+				Node node = findNodeByName(id);
+				if(node == null)
+					throw new IOException("Unknown customer id " + id + " in route " + (r + 1));
+				if(id == depot.name)
+					throw new IOException("Depot must not appear in route list");
+				if(seen.contains(id))
+					throw new IOException("Duplicate customer id " + id);
+				seen.add(id);
+				f += routes[r].addNodeEndRoute(node);
+			}
+		}
+
+		if(seen.size() != size)
+			throw new IOException("Expected " + size + " distinct customers, found " + seen.size());
+
+		double sumF = 0;
+		for(int i = 0; i < numRoutes; i++)
+			sumF += routes[i].F();
+		if(Math.abs(sumF - f) > epsilon)
+			f = sumF;
+	}
+
+	private Node findNodeByName(int name)
+	{
+		for(int i = 0; i < solution.length; i++)
+		{
+			if(solution[i].name == name)
+				return solution[i];
+		}
+		return null;
 	}
 
 }

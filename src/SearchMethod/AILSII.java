@@ -1,5 +1,6 @@
 package SearchMethod;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -63,6 +64,9 @@ public class AILSII
 	double epsilon;
 	DecimalFormat deci=new DecimalFormat("0.0000");
 	StoppingCriterionType stoppingCriterionType;
+
+	private final String initialSolutionPath;
+	private final Double initialOmega;
 	
 	public AILSII(Instance instance,InputParameters reader)
 	{ 
@@ -99,6 +103,14 @@ public class AILSII
 			newOmegaAdjustment=new OmegaAdjustment(config.getPerturbation()[i], config,instance.getSize(),idealDist);
 			omegaSetup.put(config.getPerturbation()[i]+"", newOmegaAdjustment);
 		}
+
+		this.initialSolutionPath = reader.getInitialSolutionPath();
+		this.initialOmega = reader.getInitialOmega();
+		if(this.initialOmega != null)
+		{
+			for(OmegaAdjustment oa : omegaSetup.values())
+				oa.applyInitialOverride(this.initialOmega.doubleValue());
+		}
 		
 		this.acceptanceCriterion=new AcceptanceCriterion(instance,config,executionMaximumLimit);
 
@@ -123,8 +135,22 @@ public class AILSII
 	{
 		iterator=0;
 		first=System.currentTimeMillis();
-		referenceSolution.numRoutes=instance.getMinNumberRoutes();
-		constructSolution.construct(referenceSolution);
+		if(initialSolutionPath != null)
+		{
+			try
+			{
+				referenceSolution.loadFromPrintedFormat(initialSolutionPath);
+			}
+			catch(IOException e)
+			{
+				throw new RuntimeException("Failed to load -initialSolution: " + initialSolutionPath, e);
+			}
+		}
+		else
+		{
+			referenceSolution.numRoutes=instance.getMinNumberRoutes();
+			constructSolution.construct(referenceSolution);
+		}
 		
 		feasibilityOperator.makeFeasible(referenceSolution);
 		localSearch.localSearch(referenceSolution,true);
