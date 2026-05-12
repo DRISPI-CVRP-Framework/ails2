@@ -29,7 +29,11 @@ public class IntraLocalSearch
 		this.evaluateCost=new CostEvaluation(instance);
 		this.executeMovement=new ExecuteMovement(instance);
 		this.improve=new CandidateNode(evaluateCost);
-		this.limitAdj=config.getVarphi();
+		// kNN rows have length min(knnLimit, size-1); varphi must not exceed that.
+		this.limitAdj = Math.min(
+			config.getVarphi(),
+			Math.min(config.getKnnLimit(), instance.getSize() - 1)
+		);
 	}
 	
 	private void setRoute(Route route,Node solution[]) 

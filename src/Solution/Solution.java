@@ -35,6 +35,31 @@ public class Solution
 
 	IntraLocalSearch intraLocalSearch;
 
+	/**
+	 * Count {@code Route #...} lines before {@code Cost} in a printed solution (same
+	 * convention as {@link #loadFromPrintedFormat}). Used to size internal structures
+	 * when {@code -initialSolution} has more routes than the default instance cap.
+	 */
+	public static int countPrintedRouteLines(String path) throws IOException
+	{
+		int n = 0;
+		try (BufferedReader in = new BufferedReader(new FileReader(path)))
+		{
+			String line;
+			while ((line = in.readLine()) != null)
+			{
+				line = line.trim();
+				if (line.isEmpty())
+					continue;
+				if (line.startsWith("Route"))
+					n++;
+				else if (line.startsWith("Cost"))
+					break;
+			}
+		}
+		return n;
+	}
+
 	public Solution(Instance instance, Config config)
 	{
 		this.instance = instance;

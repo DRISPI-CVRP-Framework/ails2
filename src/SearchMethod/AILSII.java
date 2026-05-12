@@ -224,6 +224,27 @@ public class AILSII
 		reader.readingInput(args);
 		
 		Instance instance=new Instance(reader);
+
+		// Cold-start (no -initialSolution) keeps the heuristic maxNumberRoutes from
+		// Instance. Improvement / BG-AILS may supply a feasible solution with more
+		// routes; bump the cap so Solution and operators allocate enough slots.
+		if (reader.getInitialSolutionPath() != null)
+		{
+			try
+			{
+				int nr = Solution.countPrintedRouteLines(reader.getInitialSolutionPath());
+				int atMost = Math.max(1, instance.getSize() - 1);
+				int capped = Math.min(nr, atMost);
+				if (capped > instance.getMaxNumberRoutes())
+					instance.setMaxNumberRoutes(capped);
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(
+					"Failed to read -initialSolution for route count: " + reader.getInitialSolutionPath(),
+					e);
+			}
+		}
 		
 		AILSII ailsII=new AILSII(instance,reader);
 		

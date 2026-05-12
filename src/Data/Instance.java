@@ -322,6 +322,15 @@ public class Instance
 		return maxNumberRoutes;
 	}
 
+	/**
+	 * Override the heuristic cap (e.g. after reading an {@code -initialSolution} with
+	 * more routes than {@link #maxNumberRoutes}). Cold-start runs keep the value from
+	 * the constructor.
+	 */
+	public void setMaxNumberRoutes(int maxNumberRoutes) {
+		this.maxNumberRoutes = maxNumberRoutes;
+	}
+
 	public int getSize() {
 		return size;
 	}
